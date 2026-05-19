@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Espace Employé</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Z-zwaq dyal l-carte dyalk li f tswira */
+        .task-card {
+            border: 2px solid #0d6efd; /* L-khet z-zreq l-mghlouq */
+            border-radius: 6px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .badge-priorite {
+            background-color: #ffc107; /* Sfer */
+            color: #000;
+        }
+        .badge-statut {
+            background-color: #0dcaf0; /* Zreq mftou7 */
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- L-Navbar li l-fouq f t-tswira -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-5 py-3">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand fs-4">Espace Employé</span>
+            <div class="d-flex text-white align-items-center">
+                <span class="me-3">Bienvenue {{ request.user.username }} |</span>
+                <a href="{% url 'logout' %}" class="text-danger text-decoration-none fw-bold">Déconnexion</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- L-wst dyal s-Safha -->
+    <div class="container">
+        <h2 class="mb-4 text-dark fw-bold">Vos Tâches à Réaliser</h2>
+
+        <!-- D-Dakhil dyal la boucle d Django -->
+        <div class="row g-4">
+            {% for t in taches %}
+            <div class="col-md-4">
+                <div class="card task-card h-100 p-2 bg-white">
+                    <div class="card-body d-flex flex-column">
+                        
+                        <!-- L-3onwan w smyyt l-projet -->
+                        <h5 class="card-title fw-bold text-dark">{{ t.titre }}</h5>
+                        <p class="card-text text-secondary small mb-4">Projet: {{ t.projet.titre }}</p>
+
+                        <!-- L-Badges w L-Bouton l-te7t -->
+                        <div class="mt-auto d-flex justify-content-between align-items-end">
+                            <div>
+                                <!-- L-lwidat d l-priorité 3la 7ssab chno khtariw -->
+                                {% if t.priorite == 'URGENTE' %}
+                                    <span class="badge bg-danger">URGENTE</span>
+                                {% elif t.priorite == 'BASSE' %}
+                                    <span class="badge bg-warning text-dark">BASSE</span>
+                                {% else %}
+                                    <span class="badge badge-priorite">{{ t.priorite }}</span>
+                                {% endif %}
+                                
+                                <span class="badge badge-statut">{{ t.statut }}</span>
+                            </div>
+
+                            <!-- HADA HWA L-BOUTON L-JDID LI KAY-DDI L-SAFHAT L-COMMENTAIRES -->
+                            <a href="{% url 'gerer_tache_employe' t.id %}" class="btn btn-sm btn-outline-primary stretched-link fw-bold">
+                                Gérer >
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            
+            {% empty %}
+            <!-- Ila ma-kan 3ndou 7ta tâche -->
+            <div class="col-12 text-center py-5">
+                <h4 class="text-muted">Vous n'avez aucune tâche assignée pour le moment. 🎉</h4>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Étape 2 — Assignation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h3>Étape 2 : Assigner la tâche</h3>
+            <p class="mb-0">Tâche : {{ tache.titre }} — Projet : {{ projet.titre }}</p>
+            <p class="mb-0">Spécialité requise : {{ tache.specialite_requise }}</p>
+            <p class="mb-0">Date limite : {{ tache.date_limite }}</p>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="mb-3">
+                    {{ form.assigne_a.label_tag }}
+                    {{ form.assigne_a }}
+                    {{ form.assigne_a.errors }}
+                </div>
+                <button type="submit" class="btn btn-success">Assigner</button>
+                <a href="{% url 'liste_taches_projet' projet.id %}" class="btn btn-secondary">Retour</a>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
