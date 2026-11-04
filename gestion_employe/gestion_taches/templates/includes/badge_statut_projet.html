@@ -1,0 +1,1 @@
+{% if p.statut == 'TERMINE' %}<span class="badge rounded-pill bg-success">{{ p.get_statut_display }}</span>{% elif p.statut == 'EN_COURS' %}<span class="badge rounded-pill bg-primary">{{ p.get_statut_display }}</span>{% else %}<span class="badge rounded-pill bg-secondary">{{ p.get_statut_display }}</span>{% endif %}

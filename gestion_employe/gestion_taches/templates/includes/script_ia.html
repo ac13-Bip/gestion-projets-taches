@@ -1,0 +1,31 @@
+<script>
+// Génération d'une description avec Gemini (requête POST protégée par le jeton CSRF)
+function appelerIA(typeElement, bouton) {
+    const titre = document.querySelector('[name="titre"]').value.trim();
+    const description = document.querySelector('[name="description"]');
+    if (!titre) {
+        alert("Saisissez d'abord un titre pour que l'IA sache quoi écrire.");
+        return;
+    }
+    const texteBouton = bouton.innerHTML;
+    bouton.disabled = true;
+    bouton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Génération...';
+
+    const donnees = new FormData();
+    donnees.append('titre', titre);
+    donnees.append('type', typeElement);
+
+    fetch("{% url 'generer_ia' %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value},
+        body: donnees,
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.description) { description.value = data.description; }
+            else { alert(data.error || "Erreur inconnue."); }
+        })
+        .catch(() => alert("Problème de connexion avec le serveur."))
+        .finally(() => { bouton.disabled = false; bouton.innerHTML = texteBouton; });
+}
+</script>

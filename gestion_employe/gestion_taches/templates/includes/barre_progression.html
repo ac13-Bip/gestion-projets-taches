@@ -1,0 +1,7 @@
+{% widthratio p.nb_terminees p.nb_taches 100 as pourcentage %}
+<div class="d-flex align-items-center gap-2" title="{{ p.nb_terminees }} / {{ p.nb_taches }} tâches terminées">
+    <div class="progress flex-grow-1" style="height: 8px;" role="progressbar" aria-valuenow="{{ pourcentage }}" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar bg-success" style="width: {{ pourcentage }}%"></div>
+    </div>
+    <small class="text-muted">{{ pourcentage }}%</small>
+</div>

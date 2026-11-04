@@ -1,0 +1,33 @@
+<div class="card mb-4">
+    <div class="card-header bg-white pt-3">
+        <h2 class="h5 fw-bold mb-0">{{ tache.titre }}</h2>
+        <small class="text-muted"><i class="fas fa-folder me-1"></i>{{ tache.projet.titre }}</small>
+    </div>
+    <div class="card-body">
+        <p class="mb-3">{{ tache.description|linebreaksbr }}</p>
+        <ul class="list-unstyled mb-0 small">
+            <li class="mb-2"><strong>Assignée à :</strong> {{ tache.assigne_a.nom_affiche|default:"Non assignée" }}</li>
+            <li class="mb-2"><strong>Spécialité requise :</strong> {{ tache.specialite_requise|default:"Aucune" }}</li>
+            <li class="mb-2"><strong>Priorité :</strong> {% include 'includes/badge_priorite.html' with t=tache %}</li>
+            <li class="mb-2"><strong>Statut :</strong> {% include 'includes/badge_statut_tache.html' with t=tache %}</li>
+            <li><strong>Date limite :</strong> <span class="{% if tache.est_en_retard %}text-danger fw-semibold{% endif %}">{{ tache.date_limite|date:"d M Y" }}</span></li>
+        </ul>
+        {% if tache.fichier_rendu %}
+            <div class="mt-4 p-3 bg-light rounded border d-flex align-items-center justify-content-between gap-2">
+                <span class="small text-truncate"><i class="fas fa-paperclip text-primary me-2"></i>{{ tache.nom_fichier_rendu }}</span>
+                <a href="{% url 'telecharger_rendu' tache.id %}" class="btn btn-sm btn-primary"><i class="fas fa-download me-1"></i> Télécharger</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if evaluation %}
+<div class="card border border-warning mb-4">
+    <div class="card-body">
+        <h3 class="h6 fw-bold text-warning"><i class="fas fa-star me-1"></i>Évaluation</h3>
+        <div class="display-6 fw-bold">{{ evaluation.note }}<span class="fs-5 text-muted">/5</span></div>
+        <p class="mb-1">{{ evaluation.feedback_manager|linebreaksbr }}</p>
+        <small class="text-muted">Par {{ evaluation.manager.nom_affiche }} le {{ evaluation.date_evaluation|date:"d M Y" }}</small>
+    </div>
+</div>
+{% endif %}

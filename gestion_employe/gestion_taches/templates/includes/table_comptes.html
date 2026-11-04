@@ -1,0 +1,36 @@
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Nom</th><th>Email</th>{% if avec_specialite %}<th>Spécialité</th>{% endif %}<th>Inscrit le</th><th>État</th><th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for compte in comptes %}
+            <tr class="{% if not compte.is_active %}text-muted{% endif %}">
+                <td class="fw-semibold">{{ compte.get_full_name|default:"—" }}</td>
+                <td>{{ compte.email }}</td>
+                {% if avec_specialite %}<td>{{ compte.specialite|default:"Généraliste" }}</td>{% endif %}
+                <td>{{ compte.date_joined|date:"d M Y" }}</td>
+                <td>{% if compte.is_active %}<span class="badge bg-success">Actif</span>{% else %}<span class="badge bg-secondary">Désactivé</span>{% endif %}</td>
+                <td class="text-end">
+                    {% if compte.is_active %}
+                        <form method="post" action="{% url url_desactiver compte.id %}" class="d-inline"
+                              onsubmit="return confirm('Désactiver le compte {{ libelle }} de {{ compte.nom_affiche|escapejs }} ?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Désactiver"><i class="fas fa-ban me-1"></i> Désactiver</button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{% url 'reactiver_utilisateur' compte.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Réactiver"><i class="fas fa-undo me-1"></i> Réactiver</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="text-center text-muted py-4">Aucun compte pour le moment.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
