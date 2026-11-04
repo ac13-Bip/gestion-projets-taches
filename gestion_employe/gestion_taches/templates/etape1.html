@@ -1,121 +1,47 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Étape 1 — Création de la tâche</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Zedna FontAwesome bach t-ban dik 🪄 f l-bouton -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* Styl sghir bach t-ban l-IA khedma Pro */
-        .btn-ia {
-            background-color: #6f42c1;
-            color: white;
-            border: none;
-        }
-        .btn-ia:hover {
-            background-color: #59359a;
-            color: white;
-        }
-    </style>
-</head>
-<body class="bg-light">
-<div class="container mt-5">
-    <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-header bg-white border-bottom py-3">
-            <h3 class="fw-bold mb-0 text-primary">Étape 1 : Créer la tâche</h3>
-            <p class="text-muted mb-0">Projet : <strong>{{ projet.titre }}</strong></p>
-        </div>
-        <div class="card-body p-4">
-            <form method="post" id="tacheForm">
-                {% csrf_token %}
-                {{ form.non_field_errors }}
-
-                <!-- 1. Titre + Bouton IA (🪄) -->
-                <div class="mb-4">
-                    {{ form.titre.label_tag }}
-                    <div class="input-group">
-                        {{ form.titre }}
-                        <button type="button" class="btn btn-ia" onclick="appelerIA()">
-                            <i class="fas fa-magic me-1"></i> Générer Description
-                        </button>
+{% extends 'base.html' %}
+{% block title %}Nouvelle tâche{% endblock %}
+{% block content %}
+<nav aria-label="fil d'ariane"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard_chef' %}">Mes projets</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'liste_taches_projet' projet.id %}">{{ projet.titre }}</a></li>
+    <li class="breadcrumb-item active">Nouvelle tâche</li>
+</ol></nav>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <span class="badge bg-primary mb-2">Étape 1 / 2</span>
+                <h1 class="h4 fw-bold mb-0 text-primary">Décrire la tâche</h1>
+                <p class="text-muted mb-0">Projet : <strong>{{ projet.titre }}</strong></p>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="{{ form.titre.id_for_label }}">Titre <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            {{ form.titre }}
+                            <button type="button" class="btn text-white" style="background-color: #6f42c1;" onclick="appelerIA('tache', this)">
+                                <i class="fas fa-magic me-1"></i> Générer la description
+                            </button>
+                        </div>
+                        {{ form.titre.errors }}
                     </div>
-                    {{ form.titre.errors }}
-                </div>
-
-                <!-- 2. Description (Gemini ghadi i-kteb hna) -->
-                <div class="mb-4">
-                    {{ form.description.label_tag }}
-                    {{ form.description }}
-                    {{ form.description.errors }}
-                </div>
-
-                <!-- Baqi les champs dyalk -->
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        {{ form.specialite_requise.label_tag }}
-                        {{ form.specialite_requise }}
-                        {{ form.specialite_requise.errors }}
+                    {% include 'includes/champ.html' with champ=form.description %}
+                    <div class="row">
+                        <div class="col-md-4">{% include 'includes/champ.html' with champ=form.specialite_requise %}</div>
+                        <div class="col-md-4">{% include 'includes/champ.html' with champ=form.priorite %}</div>
+                        <div class="col-md-4">{% include 'includes/champ.html' with champ=form.date_limite %}</div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        {{ form.priorite.label_tag }}
-                        {{ form.priorite }}
-                        {{ form.priorite.errors }}
+                    <div class="d-flex gap-2 mt-2">
+                        <button type="submit" class="btn btn-primary px-4">Étape suivante <i class="fas fa-arrow-right ms-1"></i></button>
+                        <a href="{% url 'liste_taches_projet' projet.id %}" class="btn btn-outline-secondary px-4">Annuler</a>
                     </div>
-                </div>
-
-                <div class="mb-4">
-                    {{ form.date_limite.label_tag }}
-                    {{ form.date_limite }}
-                    {{ form.date_limite.errors }}
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary px-4">Étape suivante</button>
-                    <a href="{% url 'dashboard_chef' %}" class="btn btn-outline-secondary px-4">Annuler</a>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-
-<!-- L-Mantiq d l-IA f JavaScript -->
-<script>
-function appelerIA() {
-    // Django kay-3ti l-name="titre" ootomatick l-champ
-    let titreField = document.querySelector('[name="titre"]');
-    let descField = document.querySelector('[name="description"]');
-    
-    let titreVal = titreField.value;
-
-    if (!titreVal) {
-        alert("Kteb l-titre hwa l-wwel bach Gemini i-3ref chno i-kteb!");
-        return;
-    }
-
-    // Affichiw l-Chef bli kheddamine
-    descField.value = "L'IA est en train de réfléchir... 🧠✨";
-    descField.classList.add('text-muted');
-
-    // N-sifto l-titre l-Django
-    fetch(`/generer-ia/?titre=${encodeURIComponent(titreVal)}`)
-        .then(response => response.json())
-        .then(data => {
-            descField.classList.remove('text-muted');
-            if (data.description) {
-                descField.value = data.description;
-            } else if (data.error) {
-                alert("Erreur: " + data.error);
-                descField.value = "";
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Mochkil f l-connexion m3a l-serveur.");
-            descField.value = "";
-        });
-}
-</script>
-
-</body>
-</html>
+{% endblock %}
+{% block extra_js %}{% include 'includes/script_ia.html' %}{% endblock %}

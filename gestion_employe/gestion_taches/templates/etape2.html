@@ -1,33 +1,49 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Étape 2 — Assignation</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container mt-5">
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h3>Étape 2 : Assigner la tâche</h3>
-            <p class="mb-0">Tâche : {{ tache.titre }} — Projet : {{ projet.titre }}</p>
-            <p class="mb-0">Spécialité requise : {{ tache.specialite_requise }}</p>
-            <p class="mb-0">Date limite : {{ tache.date_limite }}</p>
-        </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                {{ form.non_field_errors }}
-                <div class="mb-3">
-                    {{ form.assigne_a.label_tag }}
-                    {{ form.assigne_a }}
-                    {{ form.assigne_a.errors }}
-                </div>
-                <button type="submit" class="btn btn-success">Assigner</button>
-                <a href="{% url 'liste_taches_projet' projet.id %}" class="btn btn-secondary">Retour</a>
-            </form>
+{% extends 'base.html' %}
+{% block title %}Assigner la tâche{% endblock %}
+{% block content %}
+<nav aria-label="fil d'ariane"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard_chef' %}">Mes projets</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'liste_taches_projet' projet.id %}">{{ projet.titre }}</a></li>
+    <li class="breadcrumb-item active">Assigner</li>
+</ol></nav>
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <span class="badge bg-success mb-2">Étape 2 / 2</span>
+                <h1 class="h4 fw-bold mb-1 text-success">Assigner la tâche</h1>
+                <ul class="list-unstyled small text-muted mb-0">
+                    <li><strong>Tâche :</strong> {{ tache.titre }}</li>
+                    <li><strong>Spécialité requise :</strong> {{ tache.specialite_requise|default:"Aucune" }}</li>
+                    <li><strong>Date limite :</strong> {{ tache.date_limite|date:"d M Y" }}</li>
+                </ul>
+            </div>
+            <div class="card-body p-4">
+                {% if aucun_employe %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        {% if tous %}Aucun employé actif n'existe pour le moment.
+                        {% else %}Aucun employé disponible avec cette spécialité pour cette date limite.{% endif %}
+                    </div>
+                {% endif %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if tous %}<input type="hidden" name="tous" value="1">{% endif %}
+                    {{ form.non_field_errors }}
+                    {% include 'includes/champ.html' with champ=form.assigne_a %}
+                    <p class="form-text">
+                        {% if tous %}Tous les employés actifs sont affichés.
+                            <a href="{% url 'tache_etape2' tache.id %}">N'afficher que les employés disponibles et compétents</a>
+                        {% else %}Seuls les employés ayant la bonne spécialité et libres à cette date sont proposés.
+                            <a href="{% url 'tache_etape2' tache.id %}?tous=1">Afficher tous les employés</a>{% endif %}
+                    </p>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-4" {% if aucun_employe %}disabled{% endif %}><i class="fas fa-user-check me-1"></i> Assigner</button>
+                        <a href="{% url 'liste_taches_projet' projet.id %}" class="btn btn-outline-secondary">Plus tard</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-</body>
-</html>
+{% endblock %}

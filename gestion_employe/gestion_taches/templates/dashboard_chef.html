@@ -1,190 +1,45 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard Chef de Projet</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
+{% extends 'base.html' %}
+{% block title %}Mes projets{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <h1 class="h3 fw-bold mb-0">Bonjour {{ user.first_name|default:user.nom_affiche }} 👋</h1>
+    <a href="{% url 'creer_projet' %}" class="btn btn-primary fw-bold"><i class="fas fa-folder-plus me-1"></i> Nouveau projet</a>
+</div>
 
-        /* 1. S-Sidebar (L-Menu f l-isr) */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 260px;
-            background-color: #212529; /* K7el m-ghloq */
-            color: white;
-            padding-top: 20px;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        .sidebar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #fff;
-            letter-spacing: 1px;
-        }
-        .sidebar-brand span {
-            color: #198754; /* L-khder d Bootstrap */
-        }
-        .sidebar a {
-            color: #adb5bd;
-            text-decoration: none;
-            padding: 15px 25px;
-            display: block;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-        }
-        .sidebar a:hover, .sidebar a.active {
-            color: white;
-            background-color: #343a40;
-            border-left: 5px solid #198754;
-        }
-        .sidebar a i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
+<div class="row g-3 mb-4">
+    {% include 'includes/carte_stat.html' with libelle='Projets' valeur=total_projets icone='fa-folder' couleur='primary' %}
+    {% include 'includes/carte_stat.html' with libelle='Projets en cours' valeur=projets_en_cours icone='fa-spinner' couleur='info' %}
+    {% include 'includes/carte_stat.html' with libelle='Tâches terminées' valeur=taches_terminees icone='fa-check-double' couleur='success' suffixe=total_taches %}
+    {% include 'includes/carte_stat.html' with libelle='Tâches en retard' valeur=taches_en_retard icone='fa-clock' couleur='danger' %}
+</div>
 
-        /* 2. L-Blassa dyal l-Khedma (L-wst) */
-        .main-content {
-            margin-left: 260px; /* Khassha t-koun b-qedd l-3erd d sidebar */
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 3. L-Header l-Fouqani (Fixe) */
-        .top-header {
-            position: sticky;
-            top: 0;
-            background-color: white;
-            padding: 15px 30px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-            z-index: 999;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .content-body {
-            padding: 30px;
-            flex: 1;
-        }
-
-        .custom-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .table-hover tbody tr:hover {
-            background-color: #f8f9fa;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <i class="fas fa-layer-group"></i> Pro<span>Task</span>
-        </div>
-        
-        <a href="{% url 'dashboard_chef' %}" class="active">
-            <i class="fas fa-project-diagram"></i> Mes Projets
-        </a>
-        
-        <a href="{% url 'statistiques_chef' %}">
-            <i class="fas fa-chart-line"></i> Statistiques
-        </a>
-        
-        <div style="position: absolute; bottom: 20px; width: 100%;">
-            <a href="{% url 'logout' %}" class="text-danger"> <i class="fas fa-sign-out-alt"></i> Déconnexion
-            </a>
+<div class="card">
+    <div class="card-header bg-white pt-3"><h2 class="h5 fw-bold mb-0"><i class="fas fa-list me-2 text-secondary"></i>Mes projets</h2></div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th class="ps-4">Projet</th><th>Début</th><th>Fin prévue</th><th>Statut</th><th style="min-width: 160px;">Avancement</th><th class="text-end pe-4">Action</th></tr></thead>
+                <tbody>
+                {% for p in projets %}
+                    <tr class="ligne-cliquable" data-href="{% url 'liste_taches_projet' p.id %}">
+                        <td class="ps-4 fw-semibold">{{ p.titre }}</td>
+                        <td>{{ p.date_debut|date:"d M Y" }}</td>
+                        <td>{{ p.date_fin_prevue|date:"d M Y" }}</td>
+                        <td>{% include 'includes/badge_statut_projet.html' %}</td>
+                        <td>{% include 'includes/barre_progression.html' %}</td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'liste_taches_projet' p.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Voir les tâches <i class="fas fa-arrow-right ms-1"></i></a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="text-center py-5 text-muted">
+                        <i class="fas fa-folder-open fa-3x mb-3 d-block"></i>
+                        Vous n'avez pas encore de projet. <a href="{% url 'creer_projet' %}">Créez-en un</a> pour commencer.
+                    </td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-
-    <div class="main-content">
-        
-        <div class="top-header">
-            <h4 class="m-0 fw-bold text-dark">Espace Chef de Projet</h4>
-            <div class="d-flex align-items-center">
-                <span class="me-3 fw-bold text-muted">
-                    Bonjour, {{ request.user.first_name }} </span>
-                <i class="fas fa-user-circle fa-2x text-success"></i>
-            </div>
-        </div>
-
-        <div class="content-body">
-            
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h3 fw-bold text-secondary"><i class="fas fa-list me-2"></i>Liste des Projets</h2>
-            </div>
-
-            <div class="card custom-card">
-                <div class="card-body p-0">
-                    <table class="table table-hover m-0 align-middle">
-                        <thead class="table-dark">
-                            <tr>
-                                <th class="ps-4 py-3">Titre du projet</th>
-                                <th class="py-3">Date de début</th>
-                                <th class="py-3">Statut</th>
-                                <th class="text-center py-3">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for projet in projets %}
-                            <tr>
-                                <td class="ps-4 fw-bold text-dark">{{ projet.titre }}</td>
-                                <td>{{ projet.date_debut|date:"d M Y" }}</td>
-                                <td>
-                                    {% if projet.statut == 'Terminé' %}
-                                        <span class="badge bg-success px-3 py-2 rounded-pill">Terminé</span>
-                                    {% elif projet.statut == 'En cours' %}
-                                        <span class="badge bg-primary px-3 py-2 rounded-pill">En cours</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary px-3 py-2 rounded-pill">{{ projet.statut }}</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    <a href="{% url 'liste_taches_projet' projet.id %}" class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3">
-                                        Voir les tâches <i class="fas fa-arrow-right ms-1"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">
-                                    <i class="fas fa-folder-open fa-3x mb-3 text-light"></i><br>
-                                    Aucun projet ne vous a été assigné pour le moment.
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}

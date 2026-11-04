@@ -1,88 +1,35 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Gérer la Tâche</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light p-4">
-    <div class="container">
-        
-        <div class="row">
-            <div class="col-md-5 mb-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">{{ tache.titre }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Projet :</strong> {{ tache.projet.titre }}</p>
-                        <p><strong>Description :</strong> {{ tache.description }}</p>
-                        <p><strong>Date Limite :</strong> <span class="text-danger">{{ tache.date_limite }}</span></p>
-                        <hr>
-                        
-{% if tache.statut == 'TERMINEE' %}
-    <div class="alert alert-success d-flex align-items-center p-2 mb-0" role="alert">
-        <i class="fas fa-check-circle me-2 fs-4"></i>
-        <div>
-            Cette tâche est <strong>Terminée</strong>.<br>
-        </div>
-    </div>
-{% else %}
-    <form method="POST" class="d-flex align-items-center" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="changer_statut">
-        <label class="me-2 fw-bold">Statut:</label>
-        <select name="nouveau_statut" class="form-select form-select-sm me-2">
-            <option value="A_FAIRE" {% if tache.statut == 'A_FAIRE' %}selected{% endif %}>À Faire</option>
-            <option value="EN_COURS" {% if tache.statut == 'EN_COURS' %}selected{% endif %}>En Cours</option>
-            <option value="TERMINEE" {% if tache.statut == 'TERMINEE' %}selected{% endif %}>Terminée</option>
-        </select>
-        <div class="mb-2">
-        <label class="form-label small text-muted">Joindre un fichier </label>
-        <input type="file" name="fichier_rendu" class="form-control form-control-sm">
-        </div>
-        <button type="submit" class="btn btn-sm btn-success">Mettre à jour</button>
-    </form>
-{% endif %}
+{% extends 'base.html' %}
+{% block title %}{{ tache.titre }}{% endblock %}
+{% block content %}
+<nav aria-label="fil d'ariane"><ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard_employe' %}">Mes tâches</a></li>
+    <li class="breadcrumb-item active">{{ tache.titre }}</li>
+</ol></nav>
+<div class="row g-4">
+    <div class="col-lg-5">
+        {% include 'includes/infos_tache.html' %}
 
-                    </div>
-                </div>
-                <a href="{% url 'dashboard_employe' %}" class="btn btn-link mt-2">Retour</a>
-            </div>
-
-            <div class="col-md-7">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Commentaires</h5>
-                    </div>
-                    <div class="card-body">
-                        
-                        <form method="POST" class="mb-4">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="ajouter_commentaire">
-                            {{ form.contenu }}
-                            <button type="submit" class="btn btn-sm btn-secondary mt-2">Ajouter un commentaire</button>
-                        </form>
-
-                        <div class="list-group">
-                            {% for c in commentaires %}
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between">
-                                    <strong>{{ c.ecrit_par.first_name }} {{ c.ecrit_par.last_name }}</strong>
-                                    <small class="text-muted">{{ c.date_creation|date:"d M Y, H:i" }}</small>
-                                </div>
-                                <p class="mb-0 mt-1">{{ c.contenu }}</p>
-                            </div>
-                            {% empty %}
-                            <p class="text-muted text-center">Aucun commentaire pour le moment.</p>
-                            {% endfor %}
-                        </div>
-
-                    </div>
-                </div>
+        <div class="card">
+            <div class="card-header bg-white pt-3"><h3 class="h6 fw-bold mb-0"><i class="fas fa-edit me-1 text-primary"></i>Mettre à jour</h3></div>
+            <div class="card-body">
+                {% if evaluation %}
+                    <div class="alert alert-success mb-0"><i class="fas fa-check-circle me-1"></i>Tâche évaluée : elle ne peut plus être modifiée.</div>
+                {% else %}
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="changer_statut">
+                        {{ form_statut.non_field_errors }}
+                        {% include 'includes/champ.html' with champ=form_statut.statut %}
+                        {% include 'includes/champ.html' with champ=form_statut.fichier_rendu %}
+                        <p class="form-text mt-0">PDF, documents Office, images, archives ou code source · 10 Mo maximum.</p>
+                        <button type="submit" class="btn btn-success w-100"><i class="fas fa-save me-1"></i> Enregistrer</button>
+                    </form>
+                {% endif %}
             </div>
         </div>
-
     </div>
-</body>
-</html>
+    <div class="col-lg-7">
+        {% include 'includes/commentaires.html' %}
+    </div>
+</div>
+{% endblock %}
