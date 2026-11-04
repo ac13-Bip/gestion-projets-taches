@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from .form import CreationChefForm, ProjetForm, TacheEtape1Form, TacheEtape2Form, CommentaireForm,EvaluationForm,CreationEmployeForm
 from django.http import JsonResponse
+import os
 import google.generativeai as genai
 
 
@@ -269,7 +270,7 @@ def generer_description_ia(request):
         return JsonResponse({'error': 'Titre vide'}, status=400)
 
     try:
-        genai.configure(api_key="AIzaSyC8CZnmUnmoAzBHIzwgyXv1Uh0qEzNEarI") 
+        genai.configure(api_key=os.environ.get("GEMINI_API_KEY")) 
         
        
         model_actif = None
